@@ -1,0 +1,148 @@
+<<<<<<< HEAD
+namespace IpScanner;
+
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+
+/// <summary>
+/// Hauptklasse fuer den IP-Scan: Ping und Port-Pruefung
+/// </summary>
+public class Scanner
+{
+    private readonly ScanOptions _options;
+
+    public Scanner(ScanOptions options)
+    {
+        _options = options;
+    }
+
+    /// <summary>
+    /// Scannt alle IPs im angegebenen Bereich
+    /// Gibt eine Liste von ScanResult-Objekten zurueck
+    /// </summary>
+    public List<ScanResult> RunScan()
+    {
+        var results = new List<ScanResult>();
+
+        // Konvertiere Start- und End-IP in Integer fuer Iteration
+        uint start = IpToUint(_options.StartIp);
+        uint end   = IpToUint(_options.EndIp);
+
+        for (uint ipInt = start; ipInt <= end; ipInt++)
+        {
+            string ip = UintToIp(ipInt);
+            bool alive = PingHost(ip);
+
+            var result = new ScanResult { IpAddress = ip, IsAlive = alive };
+
+            // Port-Check nur wenn Gerat per Ping erreichbar
+            if (alive && _options.Ports.Count > 0)
+            {
+                foreach (int port in _options.Ports)
+                {
+                    bool open = CheckPort(ip, port);
+                    result.OpenPorts.Add(port, open);
+                }
+            }
+
+            results.Add(result);
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Sendet einen Ping an die angegebene IP-Adresse
+    /// Gibt true zurueck wenn eine Antwort kommt
+    /// </summary>
+    private bool PingHost(string ip)
+    {
+        try
+        {
+            using var ping = new Ping();
+            var reply = ping.Send(ip, _options.TimeoutMs);
+            return reply.Status == IPStatus.Success;
+        }
+        catch
+        {
+            return false; // Kein Ping moeglich = offline
+        }
+    }
+
+    /// <summary>
+    /// Prueft ob ein TCP-Port offen ist
+    /// </summary>
+    private bool CheckPort(string ip, int port)
+    {
+        try
+        {
+            using var client = new TcpClient();
+            // ConnectAsync mit Timeout emulieren
+            var task = client.ConnectAsync(ip, port);
+            return task.Wait(_options.TimeoutMs);
+        }
+        catch
+        {
+            return false; // Port geschlossen oder Fehler
+        }
+    }
+
+    // Hilfsmethoden: IP <-> uint Konvertierung
+    private static uint IpToUint(string ip)
+    {
+        var parts = ip.Split('.');
+        return (uint.Parse(parts[0]) << 24) |
+               (uint.Parse(parts[1]) << 16) |
+               (uint.Parse(parts[2]) <<  8) |
+                uint.Parse(parts[3]);
+    }
+
+    private static string UintToIp(uint ip)
+    {
+        return $"{ip >> 24}.{(ip >> 16) & 0xFF}.{(ip >> 8) & 0xFF}.{ip & 0xFF}";
+    }
+}
+
+/// <summary>
+/// Ergebnis eines einzelnen IP-Scans
+/// </summary>
+=======
+// NEU: Scanner.cs - nur PingHost() und leeres RunScan() 
+
+public class Scanner 
+{ 
+    private bool PingHost(string ip) 
+    { 
+        using var ping = new Ping(); 
+
+        var reply = ping.Send(ip, 500); 
+
+        return reply.Status == IPStatus.Success; 
+    } 
+    // ERGAENZT in Scanner.cs: RunScan() Methode 
+
+    public List<ScanResult> RunScan() 
+    { 
+        var results = new List<ScanResult>(); 
+
+        uint start = IpToUint(_options.StartIp); 
+
+        uint end   = IpToUint(_options.EndIp); 
+
+        for (uint i = start; i <= end; i++) 
+        { 
+            string ip = UintToIp(i); 
+
+            results.Add(new ScanResult { IpAddress = ip, IsAlive = PingHost(ip) }); 
+        } 
+        return results; 
+    } 
+} 
+
+>>>>>>> feature-cli
+public class ScanResult
+{
+    public string IpAddress { get; set; } = string.Empty;
+    public bool IsAlive { get; set; }
+    public Dictionary<int, bool> OpenPorts { get; set; } = new();
+}
