@@ -11,3 +11,7 @@ public void SaveToFile(List<ScanResult> results, string path)
                        .Select(r => $"ONLINE: {r.IpAddress}");
     File.WriteAllLines(path, lines);
 }
+
+Console.ForegroundColor = ConsoleColor.Green;  // vor ONLINE
+Console.ForegroundColor = ConsoleColor.DarkGray;  // vor offline
+Console.ResetColor();  // <-- NEU: nach der Schleife
