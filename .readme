@@ -1,0 +1,17 @@
+# IP-Adressen-Scanner
+
+Ein einfacher Netzwerk-Scanner in C#, entwickelt im Zweierteam.
+
+## Ziele
+- Arbeiten mit Git (commit, branch, merge, push, pull)
+- Teamarbeit verbessern
+- Grundfunktionen eines IP-Scanners umsetzen
+
+## Funktionen
+- Scannen von IP-Adressen
+- Ping von Geräten
+- Anzeige aktiver Hosts
+
+## Autoren
+- Jonas Feichtinger
+- Daniel Gappmaier
